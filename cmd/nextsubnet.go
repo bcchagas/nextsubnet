@@ -7,7 +7,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"log"
+//	"log"
 	"math"
 	"net"
 	"os"
@@ -66,7 +66,6 @@ var nextsubnetCmd = &cobra.Command{
 		// maybe the size wont work for ipv6 (or ipv4 with lower networks)
 		subnetCandidates := make([]*net.IPNet, int(subnetCapacity))
 		for i := 0; i < len(subnetCandidates); i++ {
-			fmt.Println(i)
 
 			subnetCandidates[i], err = cidr.Subnet(&flags.network, maskDiff, i)
 			if err != nil {
@@ -79,7 +78,7 @@ var nextsubnetCmd = &cobra.Command{
 			// fail fast before
 			err = cidr.VerifyNoOverlap(append(subnetsInUse, subnetCandidates[i]), &flags.network)
 			if err != nil {
-				log.Println(err)
+				//log.Println(err)
 				continue
 			}
 

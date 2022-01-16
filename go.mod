@@ -1,4 +1,4 @@
-module bccli
+module nextsubnet
 
 go 1.17
 

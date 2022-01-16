@@ -7,7 +7,8 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-//	"log"
+
+	//	"log"
 	"math"
 	"net"
 	"os"
@@ -22,10 +23,12 @@ var nextsubnetCmd = &cobra.Command{
 	Use:   "nextsubnet -n network -m mask [--ignore-list list | --ignore-file file]",
 	Short: "Find the next subnet available for a network",
 	Long:  `Find the next subnet available for a network.`,
-	Example: "  # Find the next /24 subnet in the network 10.0.0.1/22 that doesn't overlap any of the two existent subnets\n" +
-		"  bccli nextsubnet --network 10.0.0.1/22 --mask 24 --ignore-list \"10.0.0.1/24,10.0.0.2/25\"\n\n" +
-		"  # You can also pass in a file containing the subnets in use\n" +
-		"  bccli nextsubnet --network 10.0.0.1/22  --mask 24 --ignore-file subnets.txt\n",
+	Example: `  # Find the next /24 subnet in the network 10.0.0.1/22 
+  # that doesn't overlap any of the two existent subnets
+  bccli nextsubnet --network 10.0.0.1/22 --subnet-mask 24 --ignore-list 10.0.0.1/24,10.0.0.2/25
+
+  # You can also pass in a file containing the subnets in use
+  bccli nextsubnet --network 10.0.0.1/22  --subnet-mask 24 --ignore-file subnets.txt`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -34,8 +37,8 @@ var nextsubnetCmd = &cobra.Command{
 		}
 
 		// check mask is lower than the network block
-		if netMaskSize, _ := flags.network.Mask.Size(); netMaskSize >= flags.mask {
-			return fmt.Errorf("--mask %v must be greater than --network %v", flags.mask, flags.network.String())
+		if netMaskSize, _ := flags.network.Mask.Size(); netMaskSize >= flags.subnetMask {
+			return fmt.Errorf("--subnet-mask %v must be greater than --network %v", flags.subnetMask, flags.network.String())
 		}
 
 		subnetsInUse := make([]*net.IPNet, 0)
@@ -60,7 +63,7 @@ var nextsubnetCmd = &cobra.Command{
 
 		// TODO generate possible net values
 		netMaskSize, _ := flags.network.Mask.Size()
-		maskDiff := flags.mask - netMaskSize //flags.mask is not intuitive that it represents the subnets
+		maskDiff := flags.subnetMask - netMaskSize
 		subnetCapacity := math.Pow(2, float64(maskDiff))
 
 		// maybe the size wont work for ipv6 (or ipv4 with lower networks)
@@ -96,7 +99,7 @@ var nextsubnetCmd = &cobra.Command{
 
 var flags struct {
 	network    net.IPNet
-	mask       int
+	subnetMask int
 	ignoreList string
 	ignoreFile string
 }
@@ -107,14 +110,14 @@ func init() {
 
 	nextsubnetCmd.Flags().IPNetVarP(&flags.network, "network", "n", net.IPNet{},
 		"(Required) Address of the network the subnet will be based of in CIDR notation e.g. 10.0.0.0/22")
-	nextsubnetCmd.Flags().IntVarP(&flags.mask, "mask", "m", 0,
+	nextsubnetCmd.Flags().IntVarP(&flags.subnetMask, "subnet-mask", "m", 0,
 		"(Required) Mask size of the subnet to be found e.g. 24")
 	nextsubnetCmd.Flags().StringVar(&flags.ignoreList, "ignore-list", "",
 		"List of subnets in CIDR notation separated by comma e.g. '10.0.0.0/24,10.0.0.1/24'")
 	nextsubnetCmd.Flags().StringVar(&flags.ignoreFile, "ignore-file", "",
 		"File containing the list of subnets in CIDR notation separated by line")
 
-	nextsubnetCmd.MarkFlagRequired("mask")
+	nextsubnetCmd.MarkFlagRequired("subnet-mask")
 	nextsubnetCmd.MarkFlagRequired("network")
 
 }

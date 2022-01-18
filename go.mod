@@ -1,4 +1,4 @@
-module nextsubnet
+module github.com/bcchagas/nextsubnet
 
 go 1.17
 

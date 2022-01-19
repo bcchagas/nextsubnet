@@ -36,7 +36,7 @@ type NextSubnet struct {
 	SubnetsFilePath string
 }
 
-func (ns NextSubnet) FindNextSubnet() (*net.IPNet, error) {
+func (ns NextSubnet) Find() (*net.IPNet, error) {
 
 	for i := 0; i < int(ns.subnetCapacity()); i++ {
 

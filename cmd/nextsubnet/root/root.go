@@ -56,10 +56,11 @@ var rootCmd = &cobra.Command{
 			Network:         fp.network,
 			SubnetsStr:      fp.ignoreList,
 			SubnetsFilePath: fp.ignoreFile,
-		}.FindNextSubnet()
+		}.Find()
 
 		// TODO create a custom error to check if it's a not found error
 		// and clean up the next session that checks if subnet is != nil
+		// check go-cidr as reference
 		if err != nil {
 			return err
 		}

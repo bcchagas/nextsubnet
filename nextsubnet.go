@@ -36,7 +36,7 @@ type NextSubnet struct {
 	SubnetsFilePath string
 }
 
-func (ns NextSubnet) FindNextSubnet() (*net.IPNet, error) {
+func (ns NextSubnet) Find() (*net.IPNet, error) {
 
 	for i := 0; i < int(ns.subnetCapacity()); i++ {
 
@@ -49,7 +49,7 @@ func (ns NextSubnet) FindNextSubnet() (*net.IPNet, error) {
 		// in the range of the network it will run for
 		// all subnetCandidates regardless and return a erro for each one of them. Better to
 		// fail fast before
-		// Every candidate is presummably to return an error until a subtible subnet is found
+		// Every candidate will presummably return an error until a subtible subnet is found
 		// When that is not the case, the flow will reach this point and break out of the loop
 		// with the nextsubnet
 		subnetsInUse, err := ns.getSubnets()

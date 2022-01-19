@@ -99,6 +99,7 @@ func (ns NextSubnet) getSubnets() ([]*net.IPNet, error) {
 
 // TODO Rename ignoreFileParse to something that makes sense
 // for go clients users
+
 // ignoreListParse receives a comma separated list of subnets and
 // returns a slice of net.IPNet
 func ignoreListParse(ignoreList string) ([]*net.IPNet, error) {
@@ -116,6 +117,7 @@ func ignoreListParse(ignoreList string) ([]*net.IPNet, error) {
 
 // TODO Rename ignoreFileParse to something that makes sense
 // for go clients users
+
 // ignoreFileParse receives file path containing a list of
 // subnets in CIDR format and returns a slice of *net.IPNet
 func ignoreFileParse(ignoreFile string) ([]*net.IPNet, error) {

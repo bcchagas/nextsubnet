@@ -20,14 +20,88 @@ package nextsubnet
 
 import (
 	"bufio"
+	"math"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/apparentlymart/go-cidr/cidr"
 )
 
+type NextSubnet struct {
+	SubnetMask      int
+	Network         net.IPNet
+	SubnetsIPNet    []*net.IPNet
+	SubnetsStr      string
+	SubnetsFilePath string
+}
+
+func (ns NextSubnet) FindNextSubnet() (*net.IPNet, error) {
+
+	for i := 0; i < int(ns.subnetCapacity()); i++ {
+
+		subnetCandidate, err := cidr.Subnet(&ns.Network, ns.subnetNewBits(), i)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO when subnetsInUse contains two values that overlaps or a value that is not
+		// in the range of the network it will run for
+		// all subnetCandidates regardless and return a erro for each one of them. Better to
+		// fail fast before
+		// Every candidate is presummably to return an error until a subtible subnet is found
+		// When that is not the case, the flow will reach this point and break out of the loop
+		// with the nextsubnet
+		subnetsInUse, err := ns.getSubnets()
+		if err != nil {
+			return nil, err
+		}
+
+		err = cidr.VerifyNoOverlap(append(subnetsInUse, subnetCandidate), &ns.Network)
+		if err == nil {
+			return subnetCandidate, nil
+		}
+
+		continue
+	}
+
+	// a subnet was not found
+	return nil, nil
+}
+
+func (ns NextSubnet) subnetCapacity() float64 {
+	return math.Pow(2, float64(ns.subnetNewBits()))
+}
+
+func (ns NextSubnet) subnetNewBits() int {
+	netMaskSize, _ := ns.Network.Mask.Size()
+	return ns.SubnetMask - netMaskSize
+}
+
+func (ns NextSubnet) getSubnets() ([]*net.IPNet, error) {
+
+	if ns.SubnetsIPNet != nil {
+		return ns.SubnetsIPNet, nil
+	}
+
+	// TODO return the first in case ignore-file and ignore-list is not provided
+	if ns.SubnetsFilePath != "" {
+		return ignoreFileParse(ns.SubnetsFilePath)
+	}
+
+	if ns.SubnetsStr != "" {
+		return ignoreListParse(ns.SubnetsStr)
+	}
+
+	// When no --ignore-file or --ignore-list is passed, return an empty array
+	return []*net.IPNet{}, nil
+}
+
+// TODO Rename ignoreFileParse to something that makes sense
+// for go clients users
 // ignoreListParse receives a comma separated list of subnets and
 // returns a slice of net.IPNet
-func IgnoreListParse(ignoreList string) ([]*net.IPNet, error) {
+func ignoreListParse(ignoreList string) ([]*net.IPNet, error) {
 	var tmpIPNetSlice []*net.IPNet
 	sliceOfStrings := strings.Split(ignoreList, ",")
 	for _, v := range sliceOfStrings {
@@ -40,9 +114,11 @@ func IgnoreListParse(ignoreList string) ([]*net.IPNet, error) {
 	return tmpIPNetSlice, nil
 }
 
+// TODO Rename ignoreFileParse to something that makes sense
+// for go clients users
 // ignoreFileParse receives file path containing a list of
 // subnets in CIDR format and returns a slice of *net.IPNet
-func IgnoreFileParse(ignoreFile string) ([]*net.IPNet, error) {
+func ignoreFileParse(ignoreFile string) ([]*net.IPNet, error) {
 	f, err := os.Open(ignoreFile)
 	if err != nil {
 		return nil, err

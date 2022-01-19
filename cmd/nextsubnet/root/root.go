@@ -17,11 +17,10 @@ package root
 
 import (
 	"fmt"
-	"math"
+	"log"
 	"net"
 	"os"
 
-	"github.com/apparentlymart/go-cidr/cidr"
 	ns "github.com/bcchagas/nextsubnet"
 	"github.com/spf13/cobra"
 )
@@ -52,17 +51,25 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		subnetsInUse, err := parseSubnet(fp)
+		subnet, err := ns.NextSubnet{
+			SubnetMask:      fp.subnetMask,
+			Network:         fp.network,
+			SubnetsStr:      fp.ignoreList,
+			SubnetsFilePath: fp.ignoreFile,
+		}.FindNextSubnet()
+
+		// TODO create a custom error to check if it's a not found error
+		// and clean up the next session that checks if subnet is != nil
 		if err != nil {
 			return err
 		}
 
-		nextSubnet, err := findNextSubnet(subnetsInUse)
-		if err != nil {
-			return err
+		if subnet != nil {
+			fmt.Println(subnet)
+		} else {
+			log.Println("Not found")
+			os.Exit(1)
 		}
-
-		fmt.Println(nextSubnet)
 
 		return nil
 	},
@@ -84,6 +91,7 @@ func init() {
 
 }
 
+// TODO this validation shoud be in the nextsubnet package
 func validateFlags(fp flagpole) error {
 	if fp.ignoreList != "" && fp.ignoreFile != "" {
 		return fmt.Errorf("--ignore-list and --ignore-file specified")
@@ -98,49 +106,6 @@ func validateFlags(fp flagpole) error {
 		)
 	}
 	return nil
-}
-
-func parseSubnet(fp flagpole) ([]*net.IPNet, error) {
-	// TODO return the first in case ignore-file and ignore-list is not provided
-	if fp.ignoreFile != "" {
-		return ns.IgnoreFileParse(fp.ignoreFile)
-	}
-
-	if fp.ignoreList != "" {
-		return ns.IgnoreListParse(fp.ignoreList)
-	}
-
-	// When no --ignore-file or --ignore-list is passed, return an empty array
-	return []*net.IPNet{}, nil
-}
-
-func findNextSubnet(subnetsInUse []*net.IPNet) (*net.IPNet, error) {
-	// TODO generate possible net values
-	netMaskSize, _ := fp.network.Mask.Size()
-	maskDiff := fp.subnetMask - netMaskSize
-	subnetCapacity := math.Pow(2, float64(maskDiff))
-
-	for i := 0; i < int(subnetCapacity); i++ {
-
-		subnetCandidate, err := cidr.Subnet(&fp.network, maskDiff, i)
-		if err != nil {
-			return nil, err
-		}
-
-		// TODO when subnetsInUse contains two values that overlaps or a value that is not
-		// in the range of the network it will run for
-		// all subnetCandidates regardless and return a erro for each one of them. Better to
-		// fail fast before
-		// Every candidate is presummably to return an error until a subtible subnet is found
-		// When that is not the case, the flow will reach this point and break out of the loop
-		// with the nextsubnet
-		err = cidr.VerifyNoOverlap(append(subnetsInUse, subnetCandidate), &fp.network)
-		if err == nil {
-			return subnetCandidate, nil
-		}
-		continue
-	}
-	return nil, fmt.Errorf("in findNextSubnet: no subnet found")
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

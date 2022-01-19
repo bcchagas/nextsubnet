@@ -15,8 +15,8 @@ limitations under the License.
 */
 package main
 
-import "github.com/bcchagas/nextsubnet/cmd/nextsubnet/cmd"
+import "github.com/bcchagas/nextsubnet/cmd/nextsubnet/root"
 
 func main() {
-	cmd.Execute()
+	root.Execute()
 }

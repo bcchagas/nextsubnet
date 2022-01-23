@@ -36,6 +36,7 @@ type NextSubnet struct {
 	SubnetsFilePath string
 }
 
+// TODO remove me
 func (ns NextSubnet) Find() (*net.IPNet, error) {
 
 	for i := 0; i < int(ns.subnetCapacity()); i++ {

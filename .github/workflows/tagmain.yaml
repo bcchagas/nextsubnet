@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - 'release/**'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,4 +15,3 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO_OWNER: bcchagas
         WITH_V: true
-        

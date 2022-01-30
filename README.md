@@ -1,7 +1,7 @@
 ![nextsubnet logo](./logo/nextsubnet-banner.jpeg)
 
 # NEXTSUBNET
-`nextsubnet` is a tool for helping you find out what the next subnet available is in a given virtual network, specially when it already have some subnets created and you want to fill in the gaps when possible.
+`nextsubnet` is a tool for helping you find out what the next subnet available is in a given virtual network, specially when it already has some subnets created and you want to fill in the gaps when possible.
 
 ## INSTALATION
 

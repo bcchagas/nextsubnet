@@ -46,3 +46,6 @@ vnet: 10.0.0.1/22
 
 In the ever changing environment that is the cloud, it's often the case that a subnet is no longer needed and is eventually removed, leaving a gap. Using `nextsubnet` you can optimize the virtual network address space usage by filling those gaps whenever possible.
 
+## ROADMAP
+
+📅 Upcomming features and changes can be seen at [nextsubnet roadmap](https://github.com/users/bcchagas/projects/1/views/1)

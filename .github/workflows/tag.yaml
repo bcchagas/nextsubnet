@@ -15,5 +15,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO_OWNER: bcchagas
         WITH_V: true
-#       RELEASE_BRANCHES: None # All releases are prerelease for now
-#       CUSTOM_TAG: v0.4.0
+        # RELEASE_BRANCHES: None # All releases are prerelease for now
+        # CUSTOM_TAG: v0.4.0
